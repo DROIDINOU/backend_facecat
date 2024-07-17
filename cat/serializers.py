@@ -1,7 +1,7 @@
 # myapp/serializers.py
 
 from rest_framework import serializers
-from .models import CustomUser,Messages, Comments
+from .models import CustomUser,Messages, Comments,Profile
 
 from rest_framework import serializers
 from .models import CustomUser, Cats
@@ -72,4 +72,10 @@ class Comments_By_Message_Serializer(serializers.ModelSerializer):
         model = Comments
         fields = ['id', 'content', 'timestamp', 'auteur', 'likes', 'message']
         read_only_fields = ['id', 'timestamp', 'auteur', 'likes']
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['photo']
 

@@ -9,7 +9,7 @@ from .serializers import CatsSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Cats, CustomUser,Messages,Comments
-from .serializers import CatsSerializer, UserSerializer,MessageSerializer,CommentsSerializer,CommentsAllSerializer, Comments_By_Message_Serializer, FriendsSerializer
+from .serializers import CatsSerializer, UserSerializer,MessageSerializer,CommentsSerializer,CommentsAllSerializer, Comments_By_Message_Serializer, FriendsSerializer, ProfileSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.contrib.auth import authenticate, login, logout
@@ -276,3 +276,11 @@ class searchUserFriend (generics.ListAPIView):
         if username_startswith is not None:
             queryset = queryset.filter(username__startswith=username_startswith[:3])
         return queryset
+
+class ProfilePhotoUploadView(generics.UpdateAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        # Retourne le profil de l'utilisateur actuel
+        return self.request.user.profile
