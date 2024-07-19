@@ -353,33 +353,12 @@ class PointsView(generics.RetrieveAPIView):
 
 
 
-class AddFriendView(APIView):
-    def post(self, request, username):
-        user = request.user
-        try:
-            friend = CustomUser.objects.get(username=username)
-        except CustomUser.DoesNotExist:
-            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
-        
-        if user == friend:
-            return Response({"error": "You cannot add yourself as a friend."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        user.add_friend(friend)
-        return Response({"message": "Friend added successfully."}, status=status.HTTP_200_OK)
+class UserFriendsView(APIView):
+    def get(self, request, *args, **kwargs):
+        user = request.user  # Récupère l'utilisateur connecté
+        serializer = CustomfriendsSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-class RemoveFriendView(APIView):
-    def post(self, request, username):
-        user = request.user
-        try:
-            friend = CustomUser.objects.get(username=username)
-        except CustomUser.DoesNotExist:
-            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
-        
-        if user == friend:
-            return Response({"error": "You cannot remove yourself as a friend."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        user.remove_friend(friend)
-        return Response({"message": "Friend removed successfully."}, status=status.HTTP_200_OK)
 
 
 class AddFriendsView(APIView):

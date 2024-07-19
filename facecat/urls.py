@@ -1,6 +1,10 @@
 
 from django.urls import path
-from cat.views import ChatCreateView,RegisterView, LoginView,MessagesView,MessagesListView, get_csrf_token, LikeMessageAPIView,MessageLikesCountAPIView, CommentsCountAPIView,CommentsListView,CommentsView,LikeCommentsAPIView,CommentslinkmessageAPIView,CommentsAll,CommentsByMessage, searchUserFriend,ProfilePhotoUploadView
+from cat.views import (ChatCreateView,RegisterView, LoginView,MessagesView,MessagesListView, get_csrf_token, 
+                       LikeMessageAPIView,MessageLikesCountAPIView, CommentsCountAPIView,CommentsListView,CommentsView,
+                       LikeCommentsAPIView,CommentslinkmessageAPIView,CommentsAll,CommentsByMessage, searchUserFriend,
+                       ProfilePhotoUploadView, AddFriendsView,RemoveFriendsView,UserFriendsView)
+
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.contrib import admin
 from django.urls import path, include
@@ -28,6 +32,9 @@ urlpatterns = [
     path('comments/all/', CommentsAll.as_view(), name='comments-creates'),
     path('comments/commentsbymessage/link/<int:message>/', CommentsByMessage.as_view(), name='comment-by-message'),
     path('search/friends/', searchUserFriend.as_view(), name='search-user'),
+    path('getfriends/', UserFriendsView.as_view(), name='getfriends'),
+    path('addfriends/', AddFriendsView.as_view(), name='addfriends'),
+    path('removefriends/', RemoveFriendsView.as_view(), name='removefriends'),
     path('api/profile/photo/', ProfilePhotoUploadView.as_view(), name='profile-photo-upload'),
 
   
