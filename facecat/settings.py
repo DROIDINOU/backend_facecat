@@ -97,6 +97,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
+    
 }
 
 
@@ -169,7 +170,7 @@ CORS_ALLOW_CREDENTIALS = True  # Autoriser l'envoi de cookies et d'informations 
 
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Utilisation d'une session en base de données
-SESSION_COOKIE_SECURE = True  # Assurez-vous d'utiliser HTTPS
+SESSION_COOKIE_SECURE = False  # Assurez-vous d'utiliser HTTPS
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Session expirée uniquement à la fermeture du navigateur
 
 # Configuration de la politique de cookie CSRF

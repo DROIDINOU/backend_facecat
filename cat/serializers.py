@@ -1,10 +1,11 @@
 # myapp/serializers.py
 
 from rest_framework import serializers
-from .models import CustomUser,Messages, Comments,Profile
+from .models import CustomUser,Messages, Comments,Profile, ListeChats, Fun_Categories, Points
 
 from rest_framework import serializers
 from .models import CustomUser, Cats
+
 
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -77,5 +78,39 @@ class Comments_By_Message_Serializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ['photo']
+        fields = ['profile_picture']
+
+
+
+# serializer pour les tables de chats et les points attribués en fonction des catégories
+        
+class ListeChatsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ListeChats
+        fields = '__all__'
+
+class PointsSerializer (serializers.ModelSerializer):
+    class Meta:
+        model = Points
+        fields = '__all__'
+
+
+class FunCategoriesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Fun_Categories
+        fields = '__all__'
+
+
+class CustomfriendsSerializer(serializers.ModelSerializer):
+    friends = serializers.PrimaryKeyRelatedField(many=True, queryset=CustomUser.objects.all())
+    
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'username', 'friends']
+
+
+
+
+
+    
 

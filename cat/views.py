@@ -3,13 +3,14 @@
 from rest_framework import status, generics,permissions
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from .models import Cats
 from .serializers import CatsSerializer
+from django.views.decorators.csrf import ensure_csrf_cookie
+
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Cats, CustomUser,Messages,Comments
-from .serializers import CatsSerializer, UserSerializer,MessageSerializer,CommentsSerializer,CommentsAllSerializer, Comments_By_Message_Serializer, FriendsSerializer, ProfileSerializer
+from .models import Cats, CustomUser,Messages,Comments,ListeChats,Points,Fun_Categories
+from .serializers import CatsSerializer, UserSerializer,MessageSerializer,CommentsSerializer,CommentsAllSerializer, Comments_By_Message_Serializer, FriendsSerializer, ProfileSerializer,ListeChatsSerializer,PointsSerializer,FunCategoriesSerializer, CustomfriendsSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.contrib.auth import authenticate, login, logout
@@ -18,6 +19,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
+from rest_framework.parsers import MultiPartParser, FormParser
+
 
 
 class ChatCreateView(APIView):
@@ -65,7 +68,8 @@ class LoginView(APIView):
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
-        
+        print(username)
+        print(password)
         user = authenticate(username=username, password=password)
         if user is not None:
             login(request, user)
@@ -89,10 +93,25 @@ class RegisterView(APIView):
 class MessagesView(generics.CreateAPIView):
     queryset = Messages.objects.all()
     serializer_class = MessageSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
+    print("1")
+
+    def post(self, request, *args, **kwargs):
+        print("1")
+        print("Request received at MessagesView POST method")
+        print("Request Headers:", request.headers)
+        print("Request Cookies:", request.COOKIES)
+        print("CSRF Token in Request Headers:", request.META.get('HTTP_X_CSRFTOKEN'))
+        print("CSRF Token Expected:", get_token(request))
+        
+        return self.create(request, *args, **kwargs)
 
     def perform_create(self, serializer):
+        print("Inside perform_create method")
+        print("Current User:", self.request.user)
+        print("Request Data:", self.request.data)
         serializer.save(auteur=self.request.user)
+
 
 class CommentsView(generics.CreateAPIView):
     serializer_class = CommentsSerializer
@@ -104,26 +123,33 @@ class CommentsView(generics.CreateAPIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class MessagesListView(generics.ListAPIView):
     queryset = Messages.objects.all()
     serializer_class = MessageSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
         return Messages.objects.filter(auteur=user).order_by('-timestamp')
 
+
 class CommentsListView(generics.ListAPIView):
     queryset = Comments.objects.all()
     serializer_class = CommentsSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
         return Comments.objects.filter(auteur=user).order_by('-timestamp')
     
+
 def get_csrf_token(request):
+    token = get_token(request)
+    print(f"Generated CSRF Token: {token}")  # Log the token for debugging
     return JsonResponse({'csrfToken': get_token(request)})
+
+
 
 class LikeMessageAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -279,8 +305,118 @@ class searchUserFriend (generics.ListAPIView):
 
 class ProfilePhotoUploadView(generics.UpdateAPIView):
     serializer_class = ProfileSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser,)
 
+    
     def get_object(self):
-        # Retourne le profil de l'utilisateur actuel
         return self.request.user.profile
+
+    def post(self, request, *args, **kwargs):
+        print(f"User: {request.user}")  # Imprime l'utilisateur actuel
+        print(f"User ID: {request.user.id}")  # Imprime l'ID de l'utilisateur actuel
+        print(f"User Profile: {self.get_object()}")  # Imprime le profil de l'utilisateur actuel
+
+        profile = self.get_object()
+        profile.profile_picture = request.FILES.get('profile_picture')  # Récupère le fichier envoyé via 'profile_picture'
+        profile.save()
+        serializer = self.serializer_class(profile)
+        return Response(serializer.data)
+    
+
+    def put(self, request, *args, **kwargs):
+        profile = self.get_object()
+        profile.profile_picture = request.FILES.get('profile_picture')
+        profile.save()
+        serializer = self.serializer_class(profile)
+        return Response(serializer.data)
+    
+    def get(self, request, *args, **kwargs):
+        profile = self.get_object()
+        serializer = self.serializer_class(profile)
+        return Response(serializer.data)
+    
+# vue pour les chats et points 
+    
+class ListeChatView(generics.ListAPIView):
+    queryset = ListeChats.objects.all()
+    serializer_class = ListeChatsSerializer
+
+class FuncategoriesView(generics.RetrieveAPIView):
+    queryset = Fun_Categories.objects.all()
+    serializer_class = FunCategoriesSerializer
+
+
+class PointsView(generics.RetrieveAPIView):
+    queryset = Points.objects.all()
+    serializer_class = PointsSerializer
+
+
+
+class AddFriendView(APIView):
+    def post(self, request, username):
+        user = request.user
+        try:
+            friend = CustomUser.objects.get(username=username)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        if user == friend:
+            return Response({"error": "You cannot add yourself as a friend."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user.add_friend(friend)
+        return Response({"message": "Friend added successfully."}, status=status.HTTP_200_OK)
+
+class RemoveFriendView(APIView):
+    def post(self, request, username):
+        user = request.user
+        try:
+            friend = CustomUser.objects.get(username=username)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        if user == friend:
+            return Response({"error": "You cannot remove yourself as a friend."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user.remove_friend(friend)
+        return Response({"message": "Friend removed successfully."}, status=status.HTTP_200_OK)
+
+
+class AddFriendsView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = CustomfriendsSerializer(data=request.data, partial=True)
+        if serializer.is_valid():
+            user = request.user
+            friends_ids = serializer.validated_data.get('friends', [])
+
+            # Ajoute les amis
+            for friend_id in friends_ids:
+                try:
+                    friend = CustomUser.objects.get(id=friend_id)
+                    if user != friend:
+                        user.add_friend(friend)
+                except CustomUser.DoesNotExist:
+                    return Response({"error": f"User with ID {friend_id} does not exist."}, status=status.HTTP_404_NOT_FOUND)
+
+            return Response({"message": "Friends added successfully."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class RemoveFriendsView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = CustomfriendsSerializer(data=request.data, partial=True)
+        if serializer.is_valid():
+            user = request.user
+            friends_ids = serializer.validated_data.get('friends', [])
+
+            # Retire les amis
+            for friend_id in friends_ids:
+                try:
+                    friend = CustomUser.objects.get(id=friend_id)
+                    if user != friend:
+                        user.remove_friend(friend)
+                except CustomUser.DoesNotExist:
+                    return Response({"error": f"User with ID {friend_id} does not exist."}, status=status.HTTP_404_NOT_FOUND)
+
+            return Response({"message": "Friends removed successfully."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

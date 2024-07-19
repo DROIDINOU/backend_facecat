@@ -30,10 +30,6 @@ urlpatterns = [
     path('search/friends/', searchUserFriend.as_view(), name='search-user'),
     path('api/profile/photo/', ProfilePhotoUploadView.as_view(), name='profile-photo-upload'),
 
-
-
-
-
   
 
 ]
