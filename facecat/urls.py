@@ -3,7 +3,8 @@ from django.urls import path
 from cat.views import (ChatCreateView,RegisterView, LoginView,MessagesView,MessagesListView, get_csrf_token, 
                        LikeMessageAPIView,MessageLikesCountAPIView, CommentsCountAPIView,CommentsListView,CommentsView,
                        LikeCommentsAPIView,CommentslinkmessageAPIView,CommentsAll,CommentsByMessage, searchUserFriend,
-                       ProfilePhotoUploadView, AddFriendsView,RemoveFriendsView,UserFriendsView)
+                       ProfilePhotoUploadView, AddFriendsView,RemoveFriendsView,UserFriendsView,ProfileByUsernameView,
+                       CheckFriendRequestStatusView,RespondToFriendRequestView,SendFriendRequestView,UserByUsernameView, FriendrequestAll, UserrequestAll)
 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.contrib import admin
@@ -11,6 +12,8 @@ from django.urls import path, include
 from rest_framework import routers
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.auth import views as auth_views
+
 
 router = routers.DefaultRouter()
 
@@ -36,6 +39,16 @@ urlpatterns = [
     path('addfriends/', AddFriendsView.as_view(), name='addfriends'),
     path('removefriends/', RemoveFriendsView.as_view(), name='removefriends'),
     path('api/profile/photo/', ProfilePhotoUploadView.as_view(), name='profile-photo-upload'),
+    path('profile/by-username/', ProfileByUsernameView.as_view(), name='profile-by-username'),
+    path('send-friend-request/', SendFriendRequestView.as_view(), name='send-friend-request'),
+    path('respond-friend-request/', RespondToFriendRequestView.as_view(), name='respond-friend-request'),
+    path('check/', CheckFriendRequestStatusView.as_view(), name='respond-friend'),
+    path('user-by-username/', UserByUsernameView.as_view(), name='user_by_username'),
+    path('friendrequest-all/', FriendrequestAll.as_view(), name='friendrequestall'),
+    path('UserrequestAll/', UserrequestAll.as_view(), name='friendrequestall'),
+    path('api/logout/', auth_views.LogoutView.as_view(), name='logout'),
+
+
 
   
 

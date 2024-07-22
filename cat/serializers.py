@@ -1,7 +1,7 @@
 # myapp/serializers.py
 
 from rest_framework import serializers
-from .models import CustomUser,Messages, Comments,Profile, ListeChats, Fun_Categories, Points
+from .models import CustomUser,Messages, Comments,Profile, ListeChats, Fun_Categories, Points, FriendRequest
 
 from rest_framework import serializers
 from .models import CustomUser, Cats
@@ -11,6 +11,12 @@ class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['id', 'username', 'email', 'first_name', 'last_name','password']
+
+
+class CustomUserMinimalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'username']  # Inclure uniquement les champs que vous souhaitez récupérer
 
 class CatsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -35,6 +41,7 @@ class UserSerializer(serializers.ModelSerializer):
             last_name=validated_data['last_name']
         )
         return user
+    
     
 class FriendsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -107,6 +114,20 @@ class CustomfriendsSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['id', 'username', 'friends']
+
+
+class FriendRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FriendRequest
+        fields = ['id', 'from_user', 'to_user', 'status', 'created_at']
+        read_only_fields = ['from_user', 'status', 'created_at']
+
+
+class FriendRequestSerializerAll(serializers.ModelSerializer):
+      class Meta:
+        model = FriendRequest
+        fields = '__all__'
+        read_only_fields = ['id', 'from_user', 'to_user', 'status', 'created_at']
 
 
 

@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from datetime import date
+from django.conf import settings
+
 
 
 # Create your models here.
@@ -106,6 +108,25 @@ class Points(models.Model):
     
     def __str__(self):
         return f"{self.chat.nom} - {self.categorie.nom} : {self.points} points"
+    
+
+# demandes d -'amitié
+class FriendRequest(models.Model):
+    from_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='sent_friend_requests', on_delete=models.CASCADE)
+    to_user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='received_friend_requests', on_delete=models.CASCADE)
+    status = models.CharField(max_length=10, choices=[('pending', 'Pending'), ('accepted', 'Accepted'), ('rejected', 'Rejected')], default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['from_user', 'to_user'], name='unique_friend_request')
+        ]
+
+    def __str__(self):
+        return f"{self.from_user} -> {self.to_user} ({self.status})"
+
+
+
     
 
 

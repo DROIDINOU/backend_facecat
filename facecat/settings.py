@@ -34,6 +34,18 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+CORS_ALLOW_HEADERS = [
+    'content-type',
+    'authorization',
+    'x-csrftoken',
+    'x-requested-with',
+    'accept',
+    'origin',
+    'cache-control',  # Ajoutez cet en-tête ici
+    'x-custom-header',  # Si vous utilisez des en-têtes personnalisés
+]
+
+CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'DELETE']
 
 # Application definition
 
@@ -51,9 +63,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
      'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',  # Ajoutez cette ligne avant CommonMiddleware
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -156,14 +168,15 @@ DATABASES = {
     }
 }
 
-CORS_ALLOW_ALL_ORIGINS = True  # Autoriser toutes les origines (utilisé uniquement en développement)
+CORS_ALLOW_ALL_ORIGINS = False  # Autoriser toutes les origines (utilisé uniquement en développement)
 CORS_ALLOWED_ORIGINS = [
     "https://example.com",
     "https://sub.example.com",
     "http://localhost:4200",
     "http://127.0.0.1:9000",
+    "http://127.0.0.1:4200",
+
 ]
-CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'DELETE']  # Méthodes HTTP autorisées
 CORS_ALLOW_HEADERS = ['Content-Type', 'Authorization','X-Requested-With', 'X-CSRFToken']  # Ajoutez cet en-tête ici]  # En-têtes autorisés
 CORS_ALLOW_CREDENTIALS = True  # Autoriser l'envoi de cookies et d'informations d'authentification
 
@@ -171,10 +184,11 @@ CORS_ALLOW_CREDENTIALS = True  # Autoriser l'envoi de cookies et d'informations 
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # Utilisation d'une session en base de données
 SESSION_COOKIE_SECURE = False  # Assurez-vous d'utiliser HTTPS
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Session expirée uniquement à la fermeture du navigateur
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Session expirée uniquement à la fermeture du navigateur
+SESSION_COOKIE_AGE = 1209600  # 2 semaines par défaut
 
 # Configuration de la politique de cookie CSRF
-CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = False
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:4200',  # Ajoutez l'URL de votre frontend ici
 ]

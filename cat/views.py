@@ -7,10 +7,11 @@ from .serializers import CatsSerializer
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Cats, CustomUser,Messages,Comments,ListeChats,Points,Fun_Categories
-from .serializers import CatsSerializer, UserSerializer,MessageSerializer,CommentsSerializer,CommentsAllSerializer, Comments_By_Message_Serializer, FriendsSerializer, ProfileSerializer,ListeChatsSerializer,PointsSerializer,FunCategoriesSerializer, CustomfriendsSerializer
+from .models import Cats, CustomUser,Messages,Comments,ListeChats,Points,Fun_Categories,FriendRequest
+from .serializers import CatsSerializer, UserSerializer,MessageSerializer,CommentsSerializer,CommentsAllSerializer, Comments_By_Message_Serializer, FriendsSerializer, ProfileSerializer,ListeChatsSerializer,PointsSerializer,FunCategoriesSerializer, CustomfriendsSerializer,FriendRequestSerializer,CustomUserMinimalSerializer,FriendRequestSerializerAll
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.contrib.auth import authenticate, login, logout
@@ -20,6 +21,8 @@ from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.exceptions import NotFound
+
 
 
 
@@ -75,11 +78,15 @@ class LoginView(APIView):
             login(request, user)
             return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
         else:
+            print("iccccccccccccccccccccccccccccciiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 class LogoutView(APIView):
     def post(self, request):
         logout(request)
+        response = JsonResponse({'detail': 'Logged out successfully'})
+        print("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr")
+        response.delete_cookie('csrftoken')  # Optionnel : Effacez le cookie CSRF si nécessaire
         return Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
 
 class RegisterView(APIView):
@@ -354,6 +361,7 @@ class PointsView(generics.RetrieveAPIView):
 
 
 class UserFriendsView(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request, *args, **kwargs):
         user = request.user  # Récupère l'utilisateur connecté
         serializer = CustomfriendsSerializer(user)
@@ -362,6 +370,7 @@ class UserFriendsView(APIView):
 
 
 class AddFriendsView(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
         serializer = CustomfriendsSerializer(data=request.data, partial=True)
         if serializer.is_valid():
@@ -382,6 +391,7 @@ class AddFriendsView(APIView):
 
 
 class RemoveFriendsView(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request, *args, **kwargs):
         serializer = CustomfriendsSerializer(data=request.data, partial=True)
         if serializer.is_valid():
@@ -399,3 +409,133 @@ class RemoveFriendsView(APIView):
 
             return Response({"message": "Friends removed successfully."}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ProfileByUsernameView(generics.GenericAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        # Récupérer le paramètre de requête 'username'
+        username = request.query_params.get('username', None)
+        if not username:
+            return Response({"detail": "Username parameter is required."}, status=400)
+
+        # Récupérer l'utilisateur en fonction du nom d'utilisateur
+        try:
+            user = CustomUser.objects.get(username=username)
+            profile = user.profile
+        except CustomUser.DoesNotExist:
+            raise NotFound("User not found.")
+
+        # Sérialiser et retourner les données du profil
+        serializer = self.serializer_class(profile)
+        return Response(serializer.data)
+
+
+# demandes d'amitié
+class SendFriendRequestView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        to_user_id = request.data.get('to_user')
+        if not to_user_id:
+            return Response({"error": "to_user is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            to_user = CustomUser.objects.get(id=to_user_id)
+            print(to_user_id)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "User does not exist."}, status=status.HTTP_404_NOT_FOUND)
+
+        if request.user == to_user:
+            return Response({"error": "You cannot send a friend request to yourself."}, status=status.HTTP_400_BAD_REQUEST)
+
+        friend_request, created = FriendRequest.objects.get_or_create(from_user=request.user, to_user=to_user)
+        if created:
+            return Response({"message": "Friend request sent."}, status=status.HTTP_200_OK)
+        else:
+            return Response({"message": "Friend request already sent."}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+class RespondToFriendRequestView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        request_id = request.data.get('request_id')
+        action = request.data.get('action')
+
+        if not request_id or not action:
+            return Response({"error": "request_id and action are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            friend_request = FriendRequest.objects.get(id=request_id, to_user=request.user)
+        except FriendRequest.DoesNotExist:
+            return Response({"error": "Friend request does not exist."}, status=status.HTTP_404_NOT_FOUND)
+
+        if action == 'accept':
+            friend_request.status = 'accepted'
+            friend_request.save()
+            request.user.friends.add(friend_request.from_user)
+            friend_request.from_user.friends.add(request.user)
+            return Response({"message": "Friend request accepted."}, status=status.HTTP_200_OK)
+        elif action == 'reject':
+            friend_request.status = 'rejected'
+            friend_request.save()
+            return Response({"message": "Friend request rejected."}, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "Invalid action."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CheckFriendRequestStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, to_user_id):
+        user = request.user
+        to_user = get_object_or_404(CustomUser, id=to_user_id)
+
+        try:
+            friend_request = FriendRequest.objects.get(from_user=user, to_user=to_user)
+            return Response({"status": friend_request.status, "request_id": friend_request.id})
+        except FriendRequest.DoesNotExist:
+            pass
+
+        try:
+            friend_request = FriendRequest.objects.get(from_user=to_user, to_user=user)
+            return Response({"status": "received", "request_id": friend_request.id})
+        except FriendRequest.DoesNotExist:
+            return Response({"status": ""}, status=status.HTTP_200_OK)
+
+
+class FriendrequestAll(generics.ListAPIView):
+
+    queryset = FriendRequest.objects.all()
+    serializer_class = FriendRequestSerializerAll
+    permission_classes = [IsAuthenticated]
+
+
+class UserrequestAll(generics.ListAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserMinimalSerializer
+    permission_classes = [IsAuthenticated]
+
+
+
+
+
+class UserByUsernameView(generics.GenericAPIView):
+    serializer_class = CustomUserMinimalSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        username = request.query_params.get('username', None)
+        if not username:
+            return Response({"detail": "Username parameter is required."}, status=400)
+
+        try:
+            user = CustomUser.objects.get(username=username)
+        except CustomUser.DoesNotExist:
+            raise NotFound("User not found.")
+
+        serializer = self.serializer_class(user)
+        return Response(serializer.data)
