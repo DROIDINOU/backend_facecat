@@ -1,10 +1,10 @@
 
 from django.urls import path
-from cat.views import (ChatCreateView,RegisterView, LoginView,MessagesView,MessagesListView, get_csrf_token, 
+from cat.views import (ChatCreateView,RegisterView, LoginView,MessagesView,MessagesListView, 
                        LikeMessageAPIView,MessageLikesCountAPIView, CommentsCountAPIView,CommentsListView,CommentsView,
                        LikeCommentsAPIView,CommentslinkmessageAPIView,CommentsAll,CommentsByMessage, searchUserFriend,
                        ProfilePhotoUploadView, AddFriendsView,RemoveFriendsView,UserFriendsView,ProfileByUsernameView,
-                       CheckFriendRequestStatusView,RespondToFriendRequestView,SendFriendRequestView,UserByUsernameView, FriendrequestAll, UserrequestAll)
+                       CheckFriendRequestStatusView,RespondToFriendRequestView,SendFriendRequestView,UserByUsernameView, FriendrequestAll, UserrequestAll,GetCsrfToken)
 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.contrib import admin
@@ -22,7 +22,7 @@ urlpatterns = [
     path('api/add-cat/', ChatCreateView.as_view(), name='add-cat'),
     path('api/register/', RegisterView.as_view(), name='register'),    
     path('api/log/', LoginView.as_view(), name='log'),
-    path('csrf/', get_csrf_token, name='get-csrf-token'),
+    path('csrf/', GetCsrfToken.as_view(), name='get-csrf-token'),
     path('comments/try/', CommentsView.as_view(), name='commentscreation'),
     path('messages/create/', MessagesView.as_view(), name='message-create'),
     path('messages/creates/', MessagesListView.as_view(), name='messages-creates'),

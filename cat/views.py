@@ -5,9 +5,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .serializers import CatsSerializer
 from django.views.decorators.csrf import ensure_csrf_cookie
-
-
-
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Cats, CustomUser,Messages,Comments,ListeChats,Points,Fun_Categories,FriendRequest
@@ -22,6 +22,8 @@ from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.exceptions import NotFound
+from rest_framework.views import APIView
+
 
 
 
@@ -71,24 +73,19 @@ class LoginView(APIView):
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
-        print(username)
-        print(password)
         user = authenticate(username=username, password=password)
+        user_data = CustomUserMinimalSerializer(user).data
+
         if user is not None:
             login(request, user)
-            return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
+            return Response({'message': 'Login successful', 'user': user_data}, status=status.HTTP_200_OK)
         else:
-            print("iccccccccccccccccccccccccccccciiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 class LogoutView(APIView):
     def post(self, request):
         logout(request)
-        response = JsonResponse({'detail': 'Logged out successfully'})
-        print("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr")
-        response.delete_cookie('csrftoken')  # Optionnel : Effacez le cookie CSRF si nécessaire
         return Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
-
 class RegisterView(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
@@ -151,12 +148,11 @@ class CommentsListView(generics.ListAPIView):
         return Comments.objects.filter(auteur=user).order_by('-timestamp')
     
 
-def get_csrf_token(request):
-    token = get_token(request)
-    print(f"Generated CSRF Token: {token}")  # Log the token for debugging
-    return JsonResponse({'csrfToken': get_token(request)})
-
-
+class GetCsrfToken(APIView):
+    @method_decorator(ensure_csrf_cookie)
+    def get(self, request):
+        csrf_token = get_token(request)
+        return JsonResponse({'csrfToken': csrf_token})
 
 class LikeMessageAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -539,3 +535,8 @@ class UserByUsernameView(generics.GenericAPIView):
 
         serializer = self.serializer_class(user)
         return Response(serializer.data)
+    
+class LogoutView(APIView):
+    def post(self, request):
+        logout(request)
+        return Response({'message': 'Logged out successfully'}, status=status.HTTP_200_OK)
