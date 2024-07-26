@@ -32,7 +32,7 @@ SECRET_KEY = 'django-insecure-#o3e-)cxh9c!1x$!)i^_7m4h7=z8@qk(dl*%#5cpmz2c95o9ae
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', 'yourdomain.com', 'your-angular-dev-server-host']
 
 CORS_ALLOW_HEADERS = [
     'content-type',
@@ -177,7 +177,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:4200",
 
 ]
-CORS_ALLOW_HEADERS = ['Content-Type', 'Authorization','X-Requested-With', 'X-CSRFToken']  # Ajoutez cet en-tête ici]  # En-têtes autorisés
 CORS_ALLOW_CREDENTIALS = True  # Autoriser l'envoi de cookies et d'informations d'authentification
 
 

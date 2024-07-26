@@ -88,6 +88,13 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = ['profile_picture']
 
 
+class ProfileSerializer1(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = '__all__'
+        
+
+
 
 # serializer pour les tables de chats et les points attribués en fonction des catégories
         

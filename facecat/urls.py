@@ -4,7 +4,8 @@ from cat.views import (ChatCreateView,RegisterView, LoginView,MessagesView,Messa
                        LikeMessageAPIView,MessageLikesCountAPIView, CommentsCountAPIView,CommentsListView,CommentsView,
                        LikeCommentsAPIView,CommentslinkmessageAPIView,CommentsAll,CommentsByMessage, searchUserFriend,
                        ProfilePhotoUploadView, AddFriendsView,RemoveFriendsView,UserFriendsView,ProfileByUsernameView,
-                       CheckFriendRequestStatusView,RespondToFriendRequestView,SendFriendRequestView,UserByUsernameView, FriendrequestAll, UserrequestAll,GetCsrfToken)
+                       CheckFriendRequestStatusView,RespondToFriendRequestView,SendFriendRequestView,UserByUsernameView, FriendrequestAll, 
+                       UserrequestAll,GetCsrfToken,FriendsListView,LogoutView,profilebisview)
 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.contrib import admin
@@ -46,7 +47,12 @@ urlpatterns = [
     path('user-by-username/', UserByUsernameView.as_view(), name='user_by_username'),
     path('friendrequest-all/', FriendrequestAll.as_view(), name='friendrequestall'),
     path('UserrequestAll/', UserrequestAll.as_view(), name='friendrequestall'),
-    path('api/logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('api/logout/',LogoutView.as_view(), name='logout'),
+    path('api/friendlist/', FriendsListView.as_view(), name='friendlist'),
+    path('api/profilid/', profilebisview.as_view(), name='profilid'),
+
+
+
 
 
 

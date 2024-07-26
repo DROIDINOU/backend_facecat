@@ -10,8 +10,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Cats, CustomUser,Messages,Comments,ListeChats,Points,Fun_Categories,FriendRequest
-from .serializers import CatsSerializer, UserSerializer,MessageSerializer,CommentsSerializer,CommentsAllSerializer, Comments_By_Message_Serializer, FriendsSerializer, ProfileSerializer,ListeChatsSerializer,PointsSerializer,FunCategoriesSerializer, CustomfriendsSerializer,FriendRequestSerializer,CustomUserMinimalSerializer,FriendRequestSerializerAll
+from .models import Cats, CustomUser,Messages,Comments,ListeChats,Points,Fun_Categories,FriendRequest, Profile
+from .serializers import CatsSerializer, UserSerializer,MessageSerializer,CommentsSerializer,CommentsAllSerializer, Comments_By_Message_Serializer, FriendsSerializer, ProfileSerializer,ListeChatsSerializer,PointsSerializer,FunCategoriesSerializer, CustomfriendsSerializer,FriendRequestSerializer,CustomUserMinimalSerializer,FriendRequestSerializerAll, ProfileSerializer1
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.contrib.auth import authenticate, login, logout
@@ -82,10 +82,7 @@ class LoginView(APIView):
         else:
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
-class LogoutView(APIView):
-    def post(self, request):
-        logout(request)
-        return Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
+
 class RegisterView(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
@@ -341,6 +338,10 @@ class ProfilePhotoUploadView(generics.UpdateAPIView):
     
 # vue pour les chats et points 
     
+class profilebisview(generics.ListAPIView):
+    queryset = Profile.objects.all()
+    serializer_class = ProfileSerializer1
+    
 class ListeChatView(generics.ListAPIView):
     queryset = ListeChats.objects.all()
     serializer_class = ListeChatsSerializer
@@ -427,6 +428,7 @@ class ProfileByUsernameView(generics.GenericAPIView):
         # Sérialiser et retourner les données du profil
         serializer = self.serializer_class(profile)
         return Response(serializer.data)
+    
 
 
 # demandes d'amitié
@@ -540,3 +542,13 @@ class LogoutView(APIView):
     def post(self, request):
         logout(request)
         return Response({'message': 'Logged out successfully'}, status=status.HTTP_200_OK)
+    
+    
+class FriendsListView(generics.ListAPIView):
+    serializer_class = CustomUser
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        return user.friends.all()
+

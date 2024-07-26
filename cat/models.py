@@ -1,8 +1,10 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+
 from django.contrib.auth.models import AbstractUser
 from datetime import date
 from django.conf import settings
+
 
 
 
@@ -76,7 +78,7 @@ class Videos(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     profile_picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
-
+    
 
 
 # Tables des chats et les catégories pour lesquelles ils vont obtenir des points
@@ -127,8 +129,9 @@ class FriendRequest(models.Model):
 
     def __str__(self):
         return f"{self.from_user} -> {self.to_user} ({self.status})"
+    
 
-
+   
 
     
 
