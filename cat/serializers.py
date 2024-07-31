@@ -1,10 +1,8 @@
 # myapp/serializers.py
 
 from rest_framework import serializers
-from .models import CustomUser,Messages, Comments,Profile, ListeChats, Fun_Categories, Points, FriendRequest
-
+from .models import CustomUser,Messages, Comments,Profile, ListeChats, Fun_Categories, Points, FriendRequest, Photos,  Cats, Videos
 from rest_framework import serializers
-from .models import CustomUser, Cats
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -54,13 +52,16 @@ class MessageSerializer(serializers.ModelSerializer):
         fields = ['id', 'message', 'timestamp', 'auteur', 'likes',]#'commentaires'
         read_only_fields = ['id', 'timestamp', 'auteur', 'likes', ]#'commentaires'
 
+
+
+
 class CommentsSerializer(serializers.ModelSerializer):
     message_id = serializers.IntegerField(write_only=True)  # Ajout du champ message_id
 
     class Meta:
         model = Comments
-        fields = ['id', 'content', 'timestamp', 'auteur', 'likes', 'message', 'message_id']
-        read_only_fields = ['id', 'timestamp', 'auteur', 'likes', 'message']
+        fields = ['id', 'content', 'timestamp', 'auteur', 'likes', 'message','photo','video', 'message_id']
+        read_only_fields = ['id', 'timestamp', 'auteur', 'likes', 'message', 'photo','video']
 
     def create(self, validated_data):
         message_id = validated_data.pop('message_id')
@@ -72,14 +73,50 @@ class CommentsAllSerializer(serializers.ModelSerializer):
       class Meta:
         model = Comments
         fields = '__all__'
-        read_only_fields = ['id', 'content', 'timestamp', 'auteur', 'likes', 'message']
+        read_only_fields = ['id', 'content', 'timestamp', 'auteur', 'likes', 'message','photo','video']
 
 
 class Comments_By_Message_Serializer(serializers.ModelSerializer):
     class Meta:
         model = Comments
         fields = ['id', 'content', 'timestamp', 'auteur', 'likes', 'message']
-        read_only_fields = ['id', 'timestamp', 'auteur', 'likes']
+        read_only_fields = ['id', 'timestamp', 'auteur', 'likes','photo','video']
+
+
+
+
+
+class CommentsphotosSerializer(serializers.ModelSerializer):
+    photo_id = serializers.IntegerField(write_only=True)  # Ajout du champ message_id
+
+    class Meta:
+        model = Comments
+        fields = ['id', 'content', 'timestamp', 'auteur', 'likes', 'message','photo','video', 'photo_id']
+        read_only_fields = ['id', 'timestamp', 'auteur', 'likes', 'message', 'photo','video']
+
+   
+
+class Comments_By_Photo_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comments
+        fields = ['id', 'content', 'timestamp', 'auteur', 'likes', 'photo', 'video','message']
+        read_only_fields = ['id', 'timestamp', 'auteur', 'likes','video','message']
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -92,7 +129,36 @@ class ProfileSerializer1(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = '__all__'
-        
+
+
+class PhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Photos
+        fields = ['id', 'title', 'photo','timestamp', 'uploaded_at', 'owner', 'likes','is_published']
+        read_only_fields = ['id','title','timestamp', 'uploaded_at', 'owner', 'likes']
+
+
+
+class PhotoSerializer1(serializers.ModelSerializer):
+     class Meta:
+        model = Photos
+        fields = ['id', 'title', 'photo', 'timestamp', 'uploaded_at', 'owner', 'likes', 'is_published']
+        read_only_fields = ['id', 'timestamp', 'uploaded_at', 'owner']
+
+
+
+class VideosSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Videos
+        fields = ['id', 'title', 'video','timestamp', 'uploaded_at', 'owner', 'likes']
+        read_only_fields = ['id','title','timestamp', 'uploaded_at', 'owner', 'likes']
+
+
+
+class VideosSerializer1(serializers.ModelSerializer):
+    class Meta:
+        model = Videos
+        fields = '__all__'
 
 
 

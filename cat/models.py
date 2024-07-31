@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from datetime import date
 from django.conf import settings
+from django.utils import timezone
 
 
 
@@ -26,6 +27,19 @@ password: Mot de passe hérité de AbstractUser.
 friends: Champ ManyToManyField qui fait référence à lui-même ('self'). Il représente une relation d'amitié entre utilisateurs."""
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 class Cats (models.Model):
      name = models.CharField(max_length=100)
      race = models.CharField(max_length=100)
@@ -46,30 +60,51 @@ class Messages (models.Model):
 
 
 
-
-
 class Comments (models.Model):
      content = models.TextField()
      timestamp = models.DateTimeField(auto_now_add=True)
      auteur = models.ForeignKey (get_user_model(), on_delete= models.CASCADE, related_name = 'mes_commentaires') 
      likes = models.ManyToManyField(get_user_model(), related_name='comments_liked', blank=True)
-     message = models.ForeignKey(Messages, on_delete=models.CASCADE, related_name='comments')
+     photo = models.ForeignKey('Photos', on_delete=models.CASCADE, related_name='photo_comments', null=True, blank=True)
+     video = models.ForeignKey('Videos', on_delete=models.CASCADE, related_name='videos', null=True, blank=True)
+     message = models.ForeignKey(Messages, on_delete=models.CASCADE, related_name='message_comments',null=True, blank=True)
 
 
 class Photos(models.Model):
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, blank=True, null=True)
     photo = models.ImageField(upload_to='photos/')
+    timestamp = models.DateTimeField(default=timezone.now)
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='photos')
+    owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='mes_photos')
+    likes = models.ManyToManyField(get_user_model(), related_name='likes_photos', blank=True)
+    is_published = models.BooleanField(default=False) 
+
+
+
 
     def __str__(self):
         return self.title
 
+"""class FeedPhoto(models.Model):
+    title = models.CharField(max_length=255, blank=True, null=True)
+    photo = models.ImageField(upload_to='feed_photos/')
+    timestamp = models.DateTimeField(default=timezone.now)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='feed_photos')
+    likes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='likes_feed_photos', blank=True)
+
+    class Meta:
+        ordering = ['timestamp']"""
+
+
+
 class Videos(models.Model):
     title = models.CharField(max_length=255)
     video = models.FileField(upload_to='videos/')
+    timestamp = models.DateTimeField(default=timezone.now)
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='videos')
+    owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='mes_videos')
+    likes = models.ManyToManyField(get_user_model(), related_name='videos', blank=True)
 
     def __str__(self):
         return self.title

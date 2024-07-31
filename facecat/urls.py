@@ -5,8 +5,9 @@ from cat.views import (ChatCreateView,RegisterView, LoginView,MessagesView,Messa
                        LikeCommentsAPIView,CommentslinkmessageAPIView,CommentsAll,CommentsByMessage, searchUserFriend,
                        ProfilePhotoUploadView, AddFriendsView,RemoveFriendsView,UserFriendsView,ProfileByUsernameView,
                        CheckFriendRequestStatusView,RespondToFriendRequestView,SendFriendRequestView,UserByUsernameView, FriendrequestAll, 
-                       UserrequestAll,GetCsrfToken,FriendsListView,LogoutView,profilebisview)
-
+                       UserrequestAll,GetCsrfToken,FriendsListView,LogoutView,profilebisview,PhotoUploadView, 
+                       photobisview,PhotosByUsernameView, PhotosLikesCountAPIView, LikePhotosAPIView,PhotosAll, VideoLikesCountAPIView,VideoslinkmessageAPIView, LikeVideosAPIView, 
+                       VideoUploadView, videobisview, VideosByUsernameView, CommentsphotoCountAPIView,CommentslinkphotoAPIView, CommentsByPhoto, PhotoUploadfilView,CommentsViewidphoto, PhotostestAPIView, PhotoLikesCountTestAPIView)
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.contrib import admin
 from django.urls import path, include
@@ -21,43 +22,54 @@ router = routers.DefaultRouter()
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/add-cat/', ChatCreateView.as_view(), name='add-cat'),
-    path('api/register/', RegisterView.as_view(), name='register'),    
+    path('api/register/', RegisterView.as_view(), name='register'),
     path('api/log/', LoginView.as_view(), name='log'),
     path('csrf/', GetCsrfToken.as_view(), name='get-csrf-token'),
     path('comments/try/', CommentsView.as_view(), name='commentscreation'),
+    path('comments/trytry/', CommentsViewidphoto.as_view(), name='commentscreation-idphoto'),
     path('messages/create/', MessagesView.as_view(), name='message-create'),
-    path('messages/creates/', MessagesListView.as_view(), name='messages-creates'),
-    path('messages/getlikes/<int:message_id>/',MessageLikesCountAPIView.as_view() , name='messages-get'),
-    path('messages/createlikes/<int:message_id>/', LikeMessageAPIView.as_view(), name='messages-creates'),
-    path('comments/obtain/', CommentsListView.as_view(), name='comments-creates'),
-    path('comments/getlikes/<int:message_id>/',CommentsCountAPIView.as_view() , name='commentslike-get'),
-    path('comments/createlikes/<int:message_id>/', LikeCommentsAPIView.as_view(), name='commentslike-create'),
-    path('messages/comments/link/<int:message_id>/', CommentslinkmessageAPIView.as_view(), name='comment-links'),
-    path('comments/all/', CommentsAll.as_view(), name='comments-creates'),
-    path('comments/commentsbymessage/link/<int:message>/', CommentsByMessage.as_view(), name='comment-by-message'),
+    path('messages/creates/', MessagesListView.as_view(), name='messages-list-create'),
+    path('messages/getlikes/<int:message_id>/', MessageLikesCountAPIView.as_view(), name='messages-get-likes'),
+    path('photo/getlikestest/<int:photo_id>/', PhotoLikesCountTestAPIView.as_view(), name='messages-get-likes'),
+
+    path('photos/getlikes/<int:photo_id>/', PhotosLikesCountAPIView.as_view(), name='photos-get-likes'),
+    path('videos/getlikes/<int:video_id>/', VideoLikesCountAPIView.as_view(), name='videos-get-likes'),
+    path('messages/createlikes/<int:message_id>/', LikeMessageAPIView.as_view(), name='messages-create-likes'),
+    path('photos/createlikes/<int:photo_id>/', LikePhotosAPIView.as_view(), name='photos-create-likes'),
+    path('comments/obtain/', CommentsListView.as_view(), name='comments-list'),
+    path('comments/getlikes/<int:message_id>/', CommentsCountAPIView.as_view(), name='comments-get-likes'),
+    path('comments/getlikes/photo/<int:photo_id>/', CommentsphotoCountAPIView.as_view(), name='comments-photo-get-likes'),
+    path('comments/createlikes/<int:message_id>/', LikeCommentsAPIView.as_view(), name='comments-create-likes'),
+    path('videos/createlikes/<int:video_id>/', LikeVideosAPIView.as_view(), name='videos-create-likes'),
+    path('messages/comments/link/<int:message_id>/', CommentslinkmessageAPIView.as_view(), name='message-comments-link'),
+    path('messages/commentsphotos/link/<int:photo_id>/', CommentslinkphotoAPIView.as_view(), name='photo-comments-link'),
+    path('videos/comments/link/<int:video_id>/', VideoslinkmessageAPIView.as_view(), name='video-comments-link'),
+    path('comments/all/', CommentsAll.as_view(), name='comments-all'),
+    path('photos/all/', PhotosAll.as_view(), name='photos-all'),
+    path('comments/commentsbymessage/link/<int:message_id>/', CommentsByMessage.as_view(), name='comments-by-message'),
+    path('comments/commentsbyphoto/link/<int:photo_id>/', CommentsByPhoto.as_view(), name='comments-by-photo'),
     path('search/friends/', searchUserFriend.as_view(), name='search-user'),
-    path('getfriends/', UserFriendsView.as_view(), name='getfriends'),
-    path('addfriends/', AddFriendsView.as_view(), name='addfriends'),
-    path('removefriends/', RemoveFriendsView.as_view(), name='removefriends'),
+    path('getfriends/', UserFriendsView.as_view(), name='get-friends'),
+    path('addfriends/', AddFriendsView.as_view(), name='add-friends'),
+    path('removefriends/', RemoveFriendsView.as_view(), name='remove-friends'),
     path('api/profile/photo/', ProfilePhotoUploadView.as_view(), name='profile-photo-upload'),
     path('profile/by-username/', ProfileByUsernameView.as_view(), name='profile-by-username'),
     path('send-friend-request/', SendFriendRequestView.as_view(), name='send-friend-request'),
     path('respond-friend-request/', RespondToFriendRequestView.as_view(), name='respond-friend-request'),
-    path('check/', CheckFriendRequestStatusView.as_view(), name='respond-friend'),
-    path('user-by-username/', UserByUsernameView.as_view(), name='user_by_username'),
-    path('friendrequest-all/', FriendrequestAll.as_view(), name='friendrequestall'),
-    path('UserrequestAll/', UserrequestAll.as_view(), name='friendrequestall'),
-    path('api/logout/',LogoutView.as_view(), name='logout'),
+    path('check/', CheckFriendRequestStatusView.as_view(), name='check-friend-request-status'),
+    path('user-by-username/', UserByUsernameView.as_view(), name='user-by-username'),
+    path('friendrequest-all/', FriendrequestAll.as_view(), name='friendrequest-all'),
+    path('UserrequestAll/', UserrequestAll.as_view(), name='userrequest-all'),
+    path('api/logout/', LogoutView.as_view(), name='logout'),
     path('api/friendlist/', FriendsListView.as_view(), name='friendlist'),
-    path('api/profilid/', profilebisview.as_view(), name='profilid'),
-
-
-
-
-
-
-  
-
+    path('api/profilid/', profilebisview.as_view(), name='profile-id'),
+    path('api/photosupload/', PhotoUploadView.as_view(), name='photos-upload'),
+    path('api/photosuploadfilactu/', PhotoUploadfilView.as_view(), name='photos-upload-filactu'),
+    path('api/videosupload/', VideoUploadView.as_view(), name='videos-upload'),
+    path('api/photosuploadbis/', photobisview.as_view(), name='photos-upload-bis'),
+    path('api/videosuploadbis/', videobisview.as_view(), name='videos-upload-bis'),
+    path('photos/by-username/', PhotosByUsernameView.as_view(), name='photos-by-username'),
+    path('videos/by-username/', VideosByUsernameView.as_view(), name='videos-by-username'),
 ]
 
 

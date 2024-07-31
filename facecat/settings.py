@@ -189,7 +189,10 @@ SESSION_COOKIE_AGE = 1209600  # 2 semaines par défaut
 # Configuration de la politique de cookie CSRF
 CSRF_COOKIE_SECURE = False
 CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:4200',  # Ajoutez l'URL de votre frontend ici
+    'http://localhost:4200',
+    'http://127.0.0.1:4200',
+
+        # Ajoutez l'URL de votre frontend ici
 ]
 
 # Pour simplifier le développement, ajustez ceci en fonction de vos besoins en production
