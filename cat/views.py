@@ -11,7 +11,7 @@ from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Cats, CustomUser,Messages,Comments,ListeChats,Points,Fun_Categories,FriendRequest, Profile,Photos, Videos
-from .serializers import CatsSerializer, UserSerializer,MessageSerializer,CommentsSerializer,CommentsAllSerializer, Comments_By_Message_Serializer, FriendsSerializer,PhotoSerializer1, ProfileSerializer,ListeChatsSerializer,PointsSerializer,FunCategoriesSerializer, CustomfriendsSerializer,FriendRequestSerializer,CustomUserMinimalSerializer,FriendRequestSerializerAll, ProfileSerializer1, PhotoSerializer, VideosSerializer, VideosSerializer1, CommentsphotosSerializer, Comments_By_Photo_Serializer
+from .serializers import CatsSerializer, UserSerializer,MessageSerializer,CommentsSerializer,CommentsAllSerializer, Comments_By_Message_Serializer, FriendsSerializer,PhotoSerializer1, ProfileSerializer,ListeChatsSerializer,PointsSerializer,FunCategoriesSerializer, CustomfriendsSerializer,FriendRequestSerializer,CustomUserMinimalSerializer,FriendRequestSerializerAll, ProfileSerializer1, PhotoSerializer, VideosSerializer, VideosSerializer1, CommentsphotosSerializer, Comments_By_Photo_Serializer, Comments_By_Video_Serializer, CommentsvideosSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.contrib.auth import authenticate, login, logout
@@ -149,6 +149,37 @@ class CommentsViewidphoto(generics.CreateAPIView):
             return Response(response_serializer.data, status=status.HTTP_201_CREATED)
         
           return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+
+class CommentsViewidvideo(generics.CreateAPIView):
+        serializer_class = CommentsvideosSerializer
+
+        def post(self, request, *args, **kwargs):
+          serializer = self.get_serializer(data=request.data)
+          if serializer.is_valid():
+            video_id = serializer.validated_data.get('video_id')
+            content = serializer.validated_data.get('content')
+            
+            try:
+                video = Videos.objects.get(id=video_id)
+            except Videos.DoesNotExist:
+                return Response({'error': 'Video not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+            # Créez le commentaire et associez-le à la photo
+            comment = Comments.objects.create(
+                content=content,
+                video=video,
+                auteur=request.user
+            )
+
+            response_serializer = self.get_serializer(comment)
+            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+        
+          return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+
+
+
 class MessagesListView(generics.ListAPIView):
     queryset = Messages.objects.all()
     serializer_class = MessageSerializer
@@ -274,6 +305,42 @@ class PhotosLikesCountAPIView(APIView):
             return Response({"error": "Message non trouvé."}, status=status.HTTP_404_NOT_FOUND)
 
 
+class VideoLikesCountAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, video_id):
+        try:
+            # Récupérer le message par son ID
+            video = get_object_or_404(Videos, id=video_id)
+            
+            # Récupérer le nombre de likes pour ce message
+            likes_count = video.likes.count()
+
+            # Retourner la réponse avec le nombre de likes
+            return Response({"videos_count": likes_count}, status=status.HTTP_200_OK)
+
+        except Videos.DoesNotExist:
+            return Response({"error": "Video non trouvé."}, status=status.HTTP_404_NOT_FOUND) 
+        
+
+class VideoLikesCountTestAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, video_id):
+        try:
+            # Récupérer le message par son ID
+            video = get_object_or_404(Videos, id=video_id)
+            
+            # Récupérer le nombre de likes pour ce message
+            likes_count = video.likes.count()
+            print(likes_count)
+
+            # Retourner la réponse avec le nombre de likes
+            return Response({"videos_count": likes_count}, status=status.HTTP_200_OK)
+
+        except Videos.DoesNotExist:
+            return Response({"error": "Video non trouvé."}, status=status.HTTP_404_NOT_FOUND) 
+
 class LikePhotosAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -374,22 +441,7 @@ class PhotoslinkmessageAPIView(APIView):
 
 
 
-class VideoLikesCountAPIView(APIView):
-    permission_classes = [IsAuthenticated]
 
-    def get(self, request, video_id):
-        try:
-            # Récupérer le message par son ID
-            video = get_object_or_404(Videos, id=video_id)
-            
-            # Récupérer le nombre de likes pour ce message
-            likes_count = video.likes.count()
-
-            # Retourner la réponse avec le nombre de likes
-            return Response({"videos_count": likes_count}, status=status.HTTP_200_OK)
-
-        except Videos.DoesNotExist:
-            return Response({"error": "Video non trouvé."}, status=status.HTTP_404_NOT_FOUND) 
         
 
 # Commentaires
@@ -543,9 +595,9 @@ class PhotostestAPIView(APIView):
 class LikeVideosAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, videos_id):
+    def post(self, request, video_id):
         try:
-            videos = Videos.objects.get(id=videos_id)
+            videos = Videos.objects.get(id=video_id)
             action = request.data.get('action')
             user = request.user
 
@@ -649,6 +701,21 @@ class CommentsByPhoto(APIView):
 
         serializer = Comments_By_Photo_Serializer(photos, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CommentsByVideo(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        video_id = request.query_params.get('video')
+        print("id ideo",video_id)
+        if video_id is not None:
+            videos = Comments.objects.filter(video=video_id)
+        else:
+            videos = Comments.objects.all()
+
+        serializer = Comments_By_Video_Serializer(videos, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
 
 class searchUserFriend (generics.ListAPIView):
@@ -735,6 +802,35 @@ class PhotoUploadfilView(APIView):
         # Récupère toutes les photos de l'utilisateur connecté
         photos = Photos.objects.filter(owner=request.user)
         serializer = self.serializer_class(photos, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        print(f"User: {request.user}")  # Imprime l'utilisateur actuel
+        print(f"User ID: {request.user.id}")  # Imprime l'ID de l'utilisateur actuel
+        
+        # Appelle perform_create pour sauvegarder la nouvelle photo
+        return self.create(request, *args, **kwargs)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user, is_published=True)#  ,is_published=True"""
+
+
+class VideoUploadfilView(APIView):
+    serializer_class = VideosSerializer
+    permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser,)
+
+    def get(self, request, *args, **kwargs):
+        # Récupère toutes les photos de l'utilisateur connecté
+        videos = Videos.objects.filter(owner=request.user)
+        serializer = self.serializer_class(videos, many=True)
         return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):

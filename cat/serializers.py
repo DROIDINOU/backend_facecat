@@ -94,6 +94,15 @@ class CommentsphotosSerializer(serializers.ModelSerializer):
         fields = ['id', 'content', 'timestamp', 'auteur', 'likes', 'message','photo','video', 'photo_id']
         read_only_fields = ['id', 'timestamp', 'auteur', 'likes', 'message', 'photo','video']
 
+
+class CommentsvideosSerializer(serializers.ModelSerializer):
+    video_id = serializers.IntegerField(write_only=True)  # Ajout du champ message_id
+
+    class Meta:
+        model = Comments
+        fields = ['id', 'content', 'timestamp', 'auteur', 'likes', 'message','photo','video', 'video_id']
+        read_only_fields = ['id', 'timestamp', 'auteur', 'likes', 'message', 'photo','video']
+
    
 
 class Comments_By_Photo_Serializer(serializers.ModelSerializer):
@@ -101,6 +110,15 @@ class Comments_By_Photo_Serializer(serializers.ModelSerializer):
         model = Comments
         fields = ['id', 'content', 'timestamp', 'auteur', 'likes', 'photo', 'video','message']
         read_only_fields = ['id', 'timestamp', 'auteur', 'likes','video','message']
+
+
+class Comments_By_Video_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comments
+        fields = ['id', 'content', 'timestamp', 'auteur', 'likes', 'photo', 'video','message']
+        read_only_fields = ['id', 'timestamp', 'auteur', 'likes','photo','message']
+
+
 
 
 
@@ -150,8 +168,8 @@ class PhotoSerializer1(serializers.ModelSerializer):
 class VideosSerializer(serializers.ModelSerializer):
     class Meta:
         model = Videos
-        fields = ['id', 'title', 'video','timestamp', 'uploaded_at', 'owner', 'likes']
-        read_only_fields = ['id','title','timestamp', 'uploaded_at', 'owner', 'likes']
+        fields = ['id', 'title', 'video','timestamp', 'uploaded_at', 'owner', 'likes', 'is_published']
+        read_only_fields = ['id','title','timestamp', 'uploaded_at', 'owner',]
 
 
 

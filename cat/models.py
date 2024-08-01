@@ -104,7 +104,9 @@ class Videos(models.Model):
     timestamp = models.DateTimeField(default=timezone.now)
     uploaded_at = models.DateTimeField(auto_now_add=True)
     owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='mes_videos')
-    likes = models.ManyToManyField(get_user_model(), related_name='videos', blank=True)
+    likes = models.ManyToManyField(get_user_model(), related_name='videosdetestet', blank=True)
+    is_published = models.BooleanField(default=False) 
+
 
     def __str__(self):
         return self.title
