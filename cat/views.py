@@ -1155,4 +1155,35 @@ class FriendsListView(generics.ListAPIView):
     
 
 
+class FriendsMessagesView(generics.ListAPIView):
+    serializer_class = MessageSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        friends = user.friends.all()
+        return Messages.objects.filter(auteur__in=friends)
+
+
+class FriendsPhotosView(generics.ListAPIView):
+    serializer_class = PhotoSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        friends = user.friends.all()
+        return Photos.objects.filter(owner__in=friends)
+
+
+class FriendsVideosView(generics.ListAPIView):
+    serializer_class = VideosSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        friends = user.friends.all()
+        return Videos.objects.filter(owner__in=friends)
+    
+
+
 

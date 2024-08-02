@@ -8,7 +8,7 @@ from cat.views import (ChatCreateView,RegisterView, LoginView,MessagesView,Messa
                        UserrequestAll,GetCsrfToken,FriendsListView,LogoutView,profilebisview,PhotoUploadView, 
                        photobisview,PhotosByUsernameView, PhotosLikesCountAPIView, LikePhotosAPIView,PhotosAll, VideoLikesCountAPIView,VideoslinkmessageAPIView, LikeVideosAPIView, 
                        VideoUploadView, videobisview, VideosByUsernameView, CommentsphotoCountAPIView,CommentslinkphotoAPIView, CommentsByPhoto, PhotoUploadfilView,CommentsViewidphoto, 
-                       PhotostestAPIView, PhotoLikesCountTestAPIView, VideoUploadfilView,VideoLikesCountTestAPIView, CommentsByVideo, CommentsViewidvideo)
+                       PhotostestAPIView, PhotoLikesCountTestAPIView, VideoUploadfilView,VideoLikesCountTestAPIView, CommentsByVideo, CommentsViewidvideo, FriendsMessagesView, FriendsPhotosView, FriendsVideosView)
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.contrib import admin
 from django.urls import path, include
@@ -29,7 +29,9 @@ urlpatterns = [
     path('comments/try/', CommentsView.as_view(), name='commentscreation'),
     path('comments/trytry/', CommentsViewidphoto.as_view(), name='commentscreation-idphoto'),
     path('comments/trytrytry/', CommentsViewidvideo.as_view(), name='commentscreation-idvideo'),
-
+    path('api/friends/messages/', FriendsMessagesView.as_view(), name='friends_messages'),
+    path('api/friends/photos/', FriendsPhotosView.as_view(), name='friends_photos'),
+    path('api/friends/videos/', FriendsVideosView.as_view(), name='friends_videos'),
     path('messages/create/', MessagesView.as_view(), name='message-create'),
     path('messages/creates/', MessagesListView.as_view(), name='messages-list-create'),
     path('messages/getlikes/<int:message_id>/', MessageLikesCountAPIView.as_view(), name='messages-get-likes'),
