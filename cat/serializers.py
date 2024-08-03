@@ -149,6 +149,13 @@ class ProfileSerializer1(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ProfileSerializer3(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Profile
+        fields = ['user','profile_picture']
+
+
 class PhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Photos

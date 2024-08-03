@@ -8,7 +8,8 @@ from cat.views import (ChatCreateView,RegisterView, LoginView,MessagesView,Messa
                        UserrequestAll,GetCsrfToken,FriendsListView,LogoutView,profilebisview,PhotoUploadView, 
                        photobisview,PhotosByUsernameView, PhotosLikesCountAPIView, LikePhotosAPIView,PhotosAll, VideoLikesCountAPIView,VideoslinkmessageAPIView, LikeVideosAPIView, 
                        VideoUploadView, videobisview, VideosByUsernameView, CommentsphotoCountAPIView,CommentslinkphotoAPIView, CommentsByPhoto, PhotoUploadfilView,CommentsViewidphoto, 
-                       PhotostestAPIView, PhotoLikesCountTestAPIView, VideoUploadfilView,VideoLikesCountTestAPIView, CommentsByVideo, CommentsViewidvideo, FriendsMessagesView, FriendsPhotosView, FriendsVideosView)
+                       PhotostestAPIView, PhotoLikesCountTestAPIView, VideoUploadfilView,VideoLikesCountTestAPIView, CommentsByVideo, CommentsViewidvideo, 
+                       FriendsMessagesView, FriendsPhotosView, FriendsVideosView, ProfilePicturebyuseridView)
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.contrib import admin
 from django.urls import path, include
@@ -79,6 +80,8 @@ urlpatterns = [
     path('api/videosuploadbis/', videobisview.as_view(), name='videos-upload-bis'),
     path('photos/by-username/', PhotosByUsernameView.as_view(), name='photos-by-username'),
     path('videos/by-username/', VideosByUsernameView.as_view(), name='videos-by-username'),
+    path('profile-picture-all/', ProfilePicturebyuseridView.as_view(), name='profile-picturebyuserid'),
+
 ]
 
 

@@ -11,7 +11,7 @@ from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Cats, CustomUser,Messages,Comments,ListeChats,Points,Fun_Categories,FriendRequest, Profile,Photos, Videos
-from .serializers import CatsSerializer, UserSerializer,MessageSerializer,CommentsSerializer,CommentsAllSerializer, Comments_By_Message_Serializer, FriendsSerializer,PhotoSerializer1, ProfileSerializer,ListeChatsSerializer,PointsSerializer,FunCategoriesSerializer, CustomfriendsSerializer,FriendRequestSerializer,CustomUserMinimalSerializer,FriendRequestSerializerAll, ProfileSerializer1, PhotoSerializer, VideosSerializer, VideosSerializer1, CommentsphotosSerializer, Comments_By_Photo_Serializer, Comments_By_Video_Serializer, CommentsvideosSerializer
+from .serializers import CatsSerializer, UserSerializer,MessageSerializer,CommentsSerializer,CommentsAllSerializer, Comments_By_Message_Serializer, FriendsSerializer,PhotoSerializer1, ProfileSerializer,ListeChatsSerializer,PointsSerializer,FunCategoriesSerializer, CustomfriendsSerializer,FriendRequestSerializer,CustomUserMinimalSerializer,FriendRequestSerializerAll, ProfileSerializer1, PhotoSerializer, VideosSerializer, VideosSerializer1, CommentsphotosSerializer, Comments_By_Photo_Serializer, Comments_By_Video_Serializer, CommentsvideosSerializer, ProfileSerializer3
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.contrib.auth import authenticate, login, logout
@@ -26,7 +26,12 @@ from rest_framework.views import APIView
 
 
 
-
+class ProfilePicturebyuseridView(APIView):
+    def get(self, request):
+        profiles = Profile.objects.all()
+        serializer = ProfileSerializer3(profiles, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        
 
 class ChatCreateView(APIView):
     def post(self, request):
