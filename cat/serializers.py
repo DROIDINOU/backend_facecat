@@ -1,14 +1,16 @@
 # myapp/serializers.py
 
 from rest_framework import serializers
-from .models import CustomUser,Messages, Comments,Profile, ListeChats, Fun_Categories, Points, FriendRequest, Photos,  Cats, Videos
+from .models import (CustomUser, Messages, MessagesChat, Comments, Profile, Fun_Categories, Points, Photos,  Cats, Videos, Fun_Categories, Points, FriendRequest)
 from rest_framework import serializers
 
 
+
+# USER
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'email', 'first_name', 'last_name','password']
+        fields = ['id','username', 'first_name','last_name','password', 'email','friends']
 
 
 class CustomUserMinimalSerializer(serializers.ModelSerializer):
@@ -16,15 +18,11 @@ class CustomUserMinimalSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ['id', 'username']  # Inclure uniquement les champs que vous souhaitez récupérer
 
-class CatsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Cats
-        fields = ['id', 'name', 'race','presentation','created_at', 'maitre']
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'password']
+        fields = ['id', 'username', 'first_name', 'last_name', 'password','email',]
         extra_kwargs = {
             'password': {'write_only': True, 'min_length': 8},
             'email': {'required': True, 'allow_blank': False}
@@ -39,21 +37,40 @@ class UserSerializer(serializers.ModelSerializer):
             last_name=validated_data['last_name']
         )
         return user
+
+
+class CustomfriendsSerializer(serializers.ModelSerializer):
+    friends = serializers.PrimaryKeyRelatedField(many=True, queryset=CustomUser.objects.all())
     
-    
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'username', 'friends']
+
+
+
+# MESSAGES
+class MessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Messages
+        fields = ['id', 'message', 'timestamp', 'auteur', 'likes',]
+        read_only_fields = ['id', 'timestamp', 'auteur', 'likes', ]
+
+# friends
 class FriendsSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['username']
 
-class MessageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Messages
-        fields = ['id', 'message', 'timestamp', 'auteur', 'likes',]#'commentaires'
-        read_only_fields = ['id', 'timestamp', 'auteur', 'likes', ]#'commentaires'
+
+class FriendRequestSerializerAll(serializers.ModelSerializer):
+      class Meta:
+        model = FriendRequest
+        fields = '__all__'
+        read_only_fields = ['id', 'from_user', 'to_user', 'status', 'created_at']
 
 
-
+# COMMENTAIRES
+        
 
 class CommentsSerializer(serializers.ModelSerializer):
     message_id = serializers.IntegerField(write_only=True)  # Ajout du champ message_id
@@ -69,6 +86,7 @@ class CommentsSerializer(serializers.ModelSerializer):
         comment = Comments.objects.create(message=message, **validated_data)
         return comment
     
+
 class CommentsAllSerializer(serializers.ModelSerializer):
       class Meta:
         model = Comments
@@ -83,6 +101,18 @@ class Comments_By_Message_Serializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'timestamp', 'auteur', 'likes','photo','video']
 
 
+class Comments_By_Photo_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comments
+        fields = ['id', 'content', 'timestamp', 'auteur', 'likes', 'photo']
+        read_only_fields = ['id', 'timestamp', 'auteur', 'likes','video','message']
+
+
+class Comments_By_Video_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comments
+        fields = ['id', 'content', 'timestamp', 'auteur', 'likes', 'video']
+        read_only_fields = ['id', 'timestamp', 'auteur', 'likes','photo','message']
 
 
 
@@ -105,38 +135,8 @@ class CommentsvideosSerializer(serializers.ModelSerializer):
 
    
 
-class Comments_By_Photo_Serializer(serializers.ModelSerializer):
-    class Meta:
-        model = Comments
-        fields = ['id', 'content', 'timestamp', 'auteur', 'likes', 'photo', 'video','message']
-        read_only_fields = ['id', 'timestamp', 'auteur', 'likes','video','message']
 
-
-class Comments_By_Video_Serializer(serializers.ModelSerializer):
-    class Meta:
-        model = Comments
-        fields = ['id', 'content', 'timestamp', 'auteur', 'likes', 'photo', 'video','message']
-        read_only_fields = ['id', 'timestamp', 'auteur', 'likes','photo','message']
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# PHOTO PROFIL
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
@@ -155,7 +155,54 @@ class ProfileSerializer3(serializers.ModelSerializer):
         model = Profile
         fields = ['user','profile_picture']
 
+# CATS
+class CatsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cats
+        fields = ['id', 'name', 'race','owner','presentation','birth_date', 'created_at']
+        read_only_fields = ['id', 'created_at']
 
+class CatSerializer_for_id_name_owner_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cats
+        fields = ['id','name, owner']
+        read_only_fields = ['id','name, owner']
+
+
+class CatsSerializer_by_owner(serializers.ModelSerializer):
+    owner_username = serializers.SerializerMethodField()
+    owner_id = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Cats
+        fields = ['id', 'name', 'race', 'owner_username', 'owner_email', 'presentation', 'birth_date', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
+    def get_owner_username(self, obj):
+        return obj.owner.username
+
+    def get_owner_id(self, obj):
+        return obj.owner.id
+    
+# funk categories / points
+class Points_Serializer(serializers.ModelSerializer):
+    category = serializers.SerializerMethodField()
+    cat = serializers.SerializerMethodField()
+    class Meta:
+        model = Points
+        fields = ['category','cat','points']
+        read_only_fields = ['category','cat','points']
+        
+        def get_category(self, obj):
+           return obj.category.name
+        
+        
+        def get_cat(self, obj):
+           return obj.cat.name
+
+
+#PHOTOS + VIDEOS
+        
 class PhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Photos
@@ -187,45 +234,8 @@ class VideosSerializer1(serializers.ModelSerializer):
 
 
 
-# serializer pour les tables de chats et les points attribués en fonction des catégories
-        
-class ListeChatsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ListeChats
-        fields = '__all__'
-
-class PointsSerializer (serializers.ModelSerializer):
-    class Meta:
-        model = Points
-        fields = '__all__'
 
 
-class FunCategoriesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Fun_Categories
-        fields = '__all__'
-
-
-class CustomfriendsSerializer(serializers.ModelSerializer):
-    friends = serializers.PrimaryKeyRelatedField(many=True, queryset=CustomUser.objects.all())
-    
-    class Meta:
-        model = CustomUser
-        fields = ['id', 'username', 'friends']
-
-
-class FriendRequestSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FriendRequest
-        fields = ['id', 'from_user', 'to_user', 'status', 'created_at']
-        read_only_fields = ['from_user', 'status', 'created_at']
-
-
-class FriendRequestSerializerAll(serializers.ModelSerializer):
-      class Meta:
-        model = FriendRequest
-        fields = '__all__'
-        read_only_fields = ['id', 'from_user', 'to_user', 'status', 'created_at']
 
 
 

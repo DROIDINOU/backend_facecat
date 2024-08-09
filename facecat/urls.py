@@ -1,15 +1,14 @@
 
 from django.urls import path
-from cat.views import (ChatCreateView,RegisterView, LoginView,MessagesView,MessagesListView, 
+from cat.views import (RegisterView, LoginView,MessagesView,MessagesListView, 
                        LikeMessageAPIView,MessageLikesCountAPIView, CommentsCountAPIView,CommentsListView,CommentsView,
                        LikeCommentsAPIView,CommentslinkmessageAPIView,CommentsAll,CommentsByMessage, searchUserFriend,
                        ProfilePhotoUploadView, AddFriendsView,RemoveFriendsView,UserFriendsView,ProfileByUsernameView,
-                       CheckFriendRequestStatusView,RespondToFriendRequestView,SendFriendRequestView,UserByUsernameView, FriendrequestAll, 
+                       CheckFriendRequestStatusView,RespondToFriendRequestView,SendFriendRequestView,UserByUsernameView, 
                        UserrequestAll,GetCsrfToken,FriendsListView,LogoutView,profilebisview,PhotoUploadView, 
-                       photobisview,PhotosByUsernameView, PhotosLikesCountAPIView, LikePhotosAPIView,PhotosAll, VideoLikesCountAPIView,VideoslinkmessageAPIView, LikeVideosAPIView, 
-                       VideoUploadView, videobisview, VideosByUsernameView, CommentsphotoCountAPIView,CommentslinkphotoAPIView, CommentsByPhoto, PhotoUploadfilView,CommentsViewidphoto, 
-                       PhotostestAPIView, PhotoLikesCountTestAPIView, VideoUploadfilView,VideoLikesCountTestAPIView, CommentsByVideo, CommentsViewidvideo, 
-                       FriendsMessagesView, FriendsPhotosView, FriendsVideosView, ProfilePicturebyuseridView)
+                       photobisview,PhotosByUsernameView, LikePhotosAPIView,PhotosAll, VideoLikesCountAPIView, LikeVideosAPIView, 
+                       VideoUploadView, videobisview, VideosByUsernameView, CommentsByPhoto, PhotoUploadfilView,PhotosLikesCountAPIView, CommentsViewidphoto, PhotoLikesCountTestAPIView,FriendrequestAll, VideoUploadfilView,VideoLikesCountTestAPIView, CommentsByVideo, CommentsViewidvideo, 
+                       FriendsMessagesView, FriendsPhotosView, FriendsVideosView, ProfilePictureAllView)
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.contrib import admin
 from django.urls import path, include
@@ -23,7 +22,8 @@ router = routers.DefaultRouter()
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/add-cat/', ChatCreateView.as_view(), name='add-cat'),
+    path('photos/getlikes/<int:photo_id>/', PhotosLikesCountAPIView.as_view(), name='photos-get-likes'),
+    path('friendrequest-all/', FriendrequestAll.as_view(), name='friendrequest-all'),
     path('api/register/', RegisterView.as_view(), name='register'),
     path('api/log/', LoginView.as_view(), name='log'),
     path('csrf/', GetCsrfToken.as_view(), name='get-csrf-token'),
@@ -40,17 +40,13 @@ urlpatterns = [
     path('video/getlikesvideostest/<int:video_id>/', VideoLikesCountTestAPIView.as_view(), name='messagesss-get-likes'),
     path('videos/getlikes/<int:video_id>/', VideoLikesCountAPIView.as_view(), name='videos-get-likes'),
 
-    path('photos/getlikes/<int:photo_id>/', PhotosLikesCountAPIView.as_view(), name='photos-get-likes'),
     path('messages/createlikes/<int:message_id>/', LikeMessageAPIView.as_view(), name='messages-create-likes'),
     path('photos/createlikes/<int:photo_id>/', LikePhotosAPIView.as_view(), name='photos-create-likes'),
     path('comments/obtain/', CommentsListView.as_view(), name='comments-list'),
     path('comments/getlikes/<int:message_id>/', CommentsCountAPIView.as_view(), name='comments-get-likes'),
-    path('comments/getlikes/photo/<int:photo_id>/', CommentsphotoCountAPIView.as_view(), name='comments-photo-get-likes'),
     path('comments/createlikes/<int:message_id>/', LikeCommentsAPIView.as_view(), name='comments-create-likes'),
     path('videos/createlikes/<int:video_id>/', LikeVideosAPIView.as_view(), name='videos-create-likes'),
     path('messages/comments/link/<int:message_id>/', CommentslinkmessageAPIView.as_view(), name='message-comments-link'),
-    path('messages/commentsphotos/link/<int:photo_id>/', CommentslinkphotoAPIView.as_view(), name='photo-comments-link'),
-    path('videos/comments/link/<int:video_id>/', VideoslinkmessageAPIView.as_view(), name='video-comments-link'),
     path('comments/all/', CommentsAll.as_view(), name='comments-all'),
     path('photos/all/', PhotosAll.as_view(), name='photos-all'),
     path('comments/commentsbymessage/link/<int:message_id>/', CommentsByMessage.as_view(), name='comments-by-message'),
@@ -67,7 +63,6 @@ urlpatterns = [
     path('respond-friend-request/', RespondToFriendRequestView.as_view(), name='respond-friend-request'),
     path('check/', CheckFriendRequestStatusView.as_view(), name='check-friend-request-status'),
     path('user-by-username/', UserByUsernameView.as_view(), name='user-by-username'),
-    path('friendrequest-all/', FriendrequestAll.as_view(), name='friendrequest-all'),
     path('UserrequestAll/', UserrequestAll.as_view(), name='userrequest-all'),
     path('api/logout/', LogoutView.as_view(), name='logout'),
     path('api/friendlist/', FriendsListView.as_view(), name='friendlist'),
@@ -80,7 +75,7 @@ urlpatterns = [
     path('api/videosuploadbis/', videobisview.as_view(), name='videos-upload-bis'),
     path('photos/by-username/', PhotosByUsernameView.as_view(), name='photos-by-username'),
     path('videos/by-username/', VideosByUsernameView.as_view(), name='videos-by-username'),
-    path('profile-picture-all/', ProfilePicturebyuseridView.as_view(), name='profile-picturebyuserid'),
+    path('profile-picture-all/', ProfilePictureAllView.as_view(), name='profile-picturebyuserid'),
 
 ]
 

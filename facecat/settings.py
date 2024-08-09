@@ -43,6 +43,11 @@ CORS_ALLOW_HEADERS = [
     'origin',
     'cache-control',  # Ajoutez cet en-tête ici
     'x-custom-header',  # Si vous utilisez des en-têtes personnalisés
+
+]
+
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^http://localhost:4200$",  # Permet les requêtes depuis http://localhost:4200
 ]
 
 CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'DELETE']
@@ -60,6 +65,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -93,16 +99,21 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'facecat.wsgi.application'
 
+ASGI_APPLICATION = 'facecat.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379)],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

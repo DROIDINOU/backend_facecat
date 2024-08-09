@@ -94,3 +94,6 @@ db.sqlite3
 *.pg_dump
 *.pg_backup
 .pgpass
+
+# Ignore les fichiers médias
+/media/
