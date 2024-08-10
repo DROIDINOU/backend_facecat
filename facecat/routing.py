@@ -5,5 +5,6 @@ from cat.consumers import ChatConsumer  # Assurez-vous que le chemin est correct
 
 websocket_urlpatterns = [
     re_path(r'ws/chat/(?P<room_name>\w+)/$', ChatConsumer.as_asgi()),
+
 ]
 
