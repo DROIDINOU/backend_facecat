@@ -17,8 +17,19 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+
+DEFAULT_FILE_STORAGE = 'facecat.storages.backblaze_b2_storage.BackblazeB2Storage'
+
+# Remplacez ces valeurs par vos informations
+B2_KEY_ID = '00330344dba5bed0000000001'  # Votre Key ID
+B2_APPLICATION_KEY = 'K003waUoG3KxTvJeh/rhLe/qiNjCndA'  # Votre Application Key
+B2_BUCKET_NAME = 'facecat'  # Remplacez par le nom de votre bucket
+
+MEDIA_URL = 'https://f003.backblazeb2.com/file/{}/'.format(B2_BUCKET_NAME)
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -66,6 +77,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'channels',
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -186,6 +198,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200",
     "http://127.0.0.1:9000",
     "http://127.0.0.1:4200",
+     'https://f003.backblazeb2.com',
 
 
 ]
