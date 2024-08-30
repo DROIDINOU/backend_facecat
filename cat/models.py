@@ -45,6 +45,8 @@ class MessagesChat(models.Model):
     def __str__(self):
         return f"{self.sender} to {self.receiver} at {self.timestamp}"
 
+    
+
 
 # COMMENTS
 class Comments (models.Model):
@@ -114,7 +116,8 @@ class Videos(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     profile_picture = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
-    
+    likes = models.ManyToManyField(get_user_model(), related_name='likes_profile', blank=True)
+
 
 
 # GAME CATEGORIES

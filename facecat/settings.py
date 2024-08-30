@@ -23,8 +23,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_FILE_STORAGE = 'facecat.storages.backblaze_b2_storage.BackblazeB2Storage'
 
 # Remplacez ces valeurs par vos informations
-B2_KEY_ID = '00330344dba5bed0000000001'  # Votre Key ID
-B2_APPLICATION_KEY = 'K003waUoG3KxTvJeh/rhLe/qiNjCndA'  # Votre Application Key
+B2_KEY_ID = '30344dba5bed'  # Votre Key ID
+B2_APPLICATION_KEY = '003b31e93a18c75ead25d071950e07c9412f1ed483'  # Votre Application Key
 B2_BUCKET_NAME = 'facecat'  # Remplacez par le nom de votre bucket
 
 MEDIA_URL = 'https://f003.backblazeb2.com/file/{}/'.format(B2_BUCKET_NAME)
@@ -115,10 +115,8 @@ ASGI_APPLICATION = 'facecat.asgi.application'
 
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [('127.0.0.1', 6379)],
-        },
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        
     },
 }
 

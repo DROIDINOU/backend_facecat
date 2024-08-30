@@ -10,8 +10,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import CustomUser,Messages,Comments,FriendRequest, Profile,Photos, Videos
-from .serializers import FriendRequestSerializerAll, UserSerializer,MessageSerializer,CommentsSerializer,CommentsAllSerializer, Comments_By_Message_Serializer,PhotoSerializer1, ProfileSerializer, CustomfriendsSerializer,FriendsSerializer, CustomUserMinimalSerializer, ProfileSerializer1, PhotoSerializer, VideosSerializer, VideosSerializer1, CommentsphotosSerializer, Comments_By_Photo_Serializer, Comments_By_Video_Serializer, CommentsvideosSerializer, ProfileSerializer3
+from .models import CustomUser,Messages,Comments,FriendRequest, Profile,Photos, Videos, MessagesChat
+from .serializers import FriendRequestSerializerAll, UserSerializer,MessageSerializer,CommentsSerializer,CommentsAllSerializer, Comments_By_Message_Serializer,PhotoSerializer1, ProfileSerializer, CustomfriendsSerializer,FriendsSerializer, CustomUserMinimalSerializer, ProfileSerializer1, PhotoSerializer, VideosSerializer, VideosSerializer1, CommentsphotosSerializer, Comments_By_Photo_Serializer, Comments_By_Video_Serializer, CommentsvideosSerializer, ProfileSerializer3, ChatSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.contrib.auth import authenticate, login, logout
@@ -159,9 +159,9 @@ class RegisterView(APIView):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             if CustomUser.objects.filter(username=serializer.validated_data['username']).exists():
-                return Response({'error': "Cet utilisateur existe déjà. Veuillez choisir un autre nom d'utilisateur ou vous connecter s'il s'agit du vôtre."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'message': "Cet utilisateur existe déjà. Veuillez choisir un autre nom d'utilisateur ou vous connecter s'il s'agit du vôtre."}, status=status.HTTP_400_BAD_REQUEST)
             if CustomUser.objects.filter(email=serializer.validated_data['email']).exists():
-                return Response({'error': "Email déjà enregistré. Veuillez vous rendre sur SE CONNECTER"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'message': "Email déjà enregistré. Veuillez vous rendre sur SE CONNECTER"}, status=status.HTTP_400_BAD_REQUEST)
 
             user = serializer.save()
             login(request, user)  # Connecte automatiquement l'utilisateur après l'enregistrement
@@ -315,11 +315,16 @@ class CommentslinkmessageAPIView(APIView):
  # PROFILE
 # GET ALL PROFILES PICTURES
 class ProfilePictureAllView(APIView):
-    def get(self, request):
-        profiles = Profile.objects.all()
-        serializer = ProfileSerializer3(profiles, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)   
 
+  def get(self, request):
+
+        user_id = request.user.id  # Récupère l'ID de l'utilisateur actuel
+        print("????????????????????????????", user_id)
+        # Filtrer les profils pour exclure ceux où user_id est dans les likes
+        profiles = Profile.objects.exclude(likes__id=user_id)
+        # Sérialiser les profils restants
+        serializer = ProfileSerializer3(profiles, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 # CREATE PROFILE PICTURE
@@ -350,11 +355,70 @@ class ProfilePhotoUploadView(generics.UpdateAPIView):
         profile.save()
         serializer = self.serializer_class(profile)
         return Response(serializer.data)
-    
+
+
+
+class LikeProfileViewtest(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        print(f"Authenticated User: {request.user}")  # Vérifie l'utilisateur authentifié
+
+        # ID de l'utilisateur cible, dont le profil sera liké
+        target_user_id = request.data.get('user_id')  # Extraction de l'ID du corps de la requête
+        print(f"Target User ID: {target_user_id}")
+
+        if not target_user_id:
+            return Response({"detail": "User ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Récupérer le profil de l'utilisateur cible
+        target_profile = get_object_or_404(Profile, user__id=target_user_id)
+        
+        # Récupérer le profil de l'utilisateur actuel
+        current_user = request.user
+        try:
+            current_profile = get_object_or_404(Profile, user=current_user)
+        except Profile.DoesNotExist:
+            return Response({"detail": "Current user's profile does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Vérifier si l'utilisateur a déjà liké ce profil
+        if target_profile.user in current_profile.likes.all():
+            return Response({"detail": "Vous avez déjà liké ce profil."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Ajouter l'utilisateur cible aux likes du profil de l'utilisateur actuel
+        current_profile.likes.add(target_profile.user)
+        
+        # Sérialiser et retourner le profil mis à jour
+        serializer = ProfileSerializer3(current_profile)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     def get(self, request, *args, **kwargs):
-        profile = self.get_object()
-        serializer = self.serializer_class(profile)
+        profile_id = kwargs.get('profile_id')
+        if not profile_id:
+            return Response({"detail": "Profile ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        profile = get_object_or_404(Profile, id=profile_id)
+        serializer = ProfileSerializer3(profile)
         return Response(serializer.data)
+    
+    
+class LikesProfileAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, profile_id, *args, **kwargs):
+        # Récupérer le profil en utilisant l'ID passé en paramètre
+        profile = get_object_or_404(Profile, id=profile_id)
+
+        # Vérifier si l'utilisateur a déjà liké ce profil
+        if profile.likes.filter(id=request.user.id).exists():
+            return Response({"detail": "Vous avez déjà liké ce profil."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Ajouter l'utilisateur à la liste des likes
+        profile.likes.add(request.user)
+        
+        # Sérialiser et retourner le profil mis à jour
+        serializer = ProfileSerializer3(profile)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 # GET PHOTOPROFILE BY USERNAME
 class ProfileByUsernameView(generics.GenericAPIView):
@@ -935,13 +999,13 @@ class SendFriendRequestView(APIView):
             return Response({"error": "User does not exist."}, status=status.HTTP_404_NOT_FOUND)
 
         if request.user == to_user:
-            return Response({"error": "You cannot send a friend request to yourself."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "Tu es déjà ami avec toi-même non?"}, status=status.HTTP_400_BAD_REQUEST)
 
         friend_request, created = FriendRequest.objects.get_or_create(from_user=request.user, to_user=to_user)
         if created:
             return Response({"message": "Friend request sent."}, status=status.HTTP_200_OK)
         else:
-            return Response({"message": "Friend request already sent."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "Demande d'amitié déjà envoyée."}, status=status.HTTP_400_BAD_REQUEST)
         
         
 # RESPOND TO FRIENDSHIP
@@ -1014,17 +1078,47 @@ class photobisview(generics.ListAPIView):
 class videobisview(generics.ListAPIView):
     queryset = Videos.objects.all()
     serializer_class = VideosSerializer1
+
+
+# chat messages
+
+# CREATE LIKES BY MESSAGE ID 
+
+class MessagesChatCreateView(APIView):
+    """
+    Vue pour créer un message de chat.
+    """
+
+    def post(self, request, *args, **kwargs):
+        sender_id = request.data.get('sender')
+        receiver_id = request.data.get('receiver')
+        content = request.data.get('content')
+
+        try:
+            sender = CustomUser.objects.get(id=sender_id)
+            receiver = CustomUser.objects.get(id=receiver_id)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "Sender or receiver not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        message = MessagesChat(sender=sender, receiver=receiver, content=content)
+        message.save()
+
+        serializer = ChatSerializer(message)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
     
 
+class MessagesChatListView(generics.ListAPIView):
+    """
+    Vue pour récupérer les messages entre deux utilisateurs.
+    """
+    serializer_class = ChatSerializer
 
+    def get_queryset(self):
+        sender_id = self.request.query_params.get('sender')
+        receiver_id = self.request.query_params.get('receiver')
 
+        if not sender_id or not receiver_id:
+            return ChatSerializer.objects.none()
 
-
-
-
-
-
-
-
-
-
+        queryset = ChatSerializer.objects.filter(sender_id=sender_id, receiver_id=receiver_id)
+        return queryset

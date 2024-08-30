@@ -8,7 +8,7 @@ from cat.views import (RegisterView, LoginView,MessagesView,MessagesListView,
                        UserrequestAll,GetCsrfToken,FriendsListView,LogoutView,profilebisview,PhotoUploadView, 
                        photobisview,PhotosByUsernameView, LikePhotosAPIView,PhotosAll, VideoLikesCountAPIView, LikeVideosAPIView, 
                        VideoUploadView, videobisview, VideosByUsernameView, CommentsByPhoto, PhotoUploadfilView,PhotosLikesCountAPIView, CommentsViewidphoto, PhotoLikesCountTestAPIView,FriendrequestAll, VideoUploadfilView,VideoLikesCountTestAPIView, CommentsByVideo, CommentsViewidvideo, 
-                       FriendsMessagesView, FriendsPhotosView, FriendsVideosView, ProfilePictureAllView)
+                       FriendsMessagesView, FriendsPhotosView, FriendsVideosView, ProfilePictureAllView,LikesProfileAPIView, LikeProfileViewtest,MessagesChatCreateView, MessagesChatListView)
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.contrib import admin
 from django.urls import path, include
@@ -21,7 +21,10 @@ from django.contrib.auth import views as auth_views
 router = routers.DefaultRouter()
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('messageschat/', MessagesChatCreateView.as_view(), name='create-message'),
+    path('messageschat/list/', MessagesChatListView.as_view(), name='list-messages'),
+    path('admin/', admin.site.urls),   
+    path('test/', LikeProfileViewtest.as_view(), name='friendslistbyid'),
     path('photos/getlikes/<int:photo_id>/', PhotosLikesCountAPIView.as_view(), name='photos-get-likes'),
     path('friendrequest-all/', FriendrequestAll.as_view(), name='friendrequest-all'),
     path('api/register/', RegisterView.as_view(), name='register'),
@@ -36,11 +39,15 @@ urlpatterns = [
     path('messages/create/', MessagesView.as_view(), name='message-create'),
     path('messages/creates/', MessagesListView.as_view(), name='messages-list-create'),
     path('messages/getlikes/<int:message_id>/', MessageLikesCountAPIView.as_view(), name='messages-get-likes'),
+    #path('messages/getlikesprofile/<int:user_id>/', ProfileLikesCountAPIView.as_view(), name='messages-get-likes'),
+
     path('photo/getlikestest/<int:photo_id>/', PhotoLikesCountTestAPIView.as_view(), name='messagess-get-likes'),
     path('video/getlikesvideostest/<int:video_id>/', VideoLikesCountTestAPIView.as_view(), name='messagesss-get-likes'),
     path('videos/getlikes/<int:video_id>/', VideoLikesCountAPIView.as_view(), name='videos-get-likes'),
 
     path('messages/createlikes/<int:message_id>/', LikeMessageAPIView.as_view(), name='messages-create-likes'),
+    path('messages/createlikesprofile/<int:user_id>/',  LikesProfileAPIView.as_view(), name='messagesss-createsss-likesss'),
+
     path('photos/createlikes/<int:photo_id>/', LikePhotosAPIView.as_view(), name='photos-create-likes'),
     path('comments/obtain/', CommentsListView.as_view(), name='comments-list'),
     path('comments/getlikes/<int:message_id>/', CommentsCountAPIView.as_view(), name='comments-get-likes'),
@@ -76,6 +83,7 @@ urlpatterns = [
     path('photos/by-username/', PhotosByUsernameView.as_view(), name='photos-by-username'),
     path('videos/by-username/', VideosByUsernameView.as_view(), name='videos-by-username'),
     path('profile-picture-all/', ProfilePictureAllView.as_view(), name='profile-picturebyuserid'),
+
 
 ]
 

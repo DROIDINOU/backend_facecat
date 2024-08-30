@@ -140,7 +140,7 @@ class CommentsvideosSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ['profile_picture']
+        fields = ['user','profile_picture','likes']
 
 
 class ProfileSerializer1(serializers.ModelSerializer):
@@ -150,10 +150,10 @@ class ProfileSerializer1(serializers.ModelSerializer):
 
 
 class ProfileSerializer3(serializers.ModelSerializer):
-    
+    user = CustomUserMinimalSerializer()
     class Meta:
         model = Profile
-        fields = ['user','profile_picture']
+        fields = ['user','profile_picture','likes']
 
 # CATS
 class CatsSerializer(serializers.ModelSerializer):
@@ -231,6 +231,13 @@ class VideosSerializer1(serializers.ModelSerializer):
     class Meta:
         model = Videos
         fields = '__all__'
+
+
+class ChatSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MessagesChat
+        fields = ['sender', 'receiver','content','timestamp','read']
+        read_only_fields = ['timestamp','content']
 
 
 
