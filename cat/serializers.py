@@ -155,6 +155,13 @@ class ProfileSerializer3(serializers.ModelSerializer):
         model = Profile
         fields = ['user','profile_picture','likes']
 
+class ProfileSerializer4(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)  # Ajout du champ username
+
+    class Meta:
+        model = Profile
+        fields = ['id', 'profile_picture', 'likes', 'username']  # Inclure 'username' dans les champs
+
 # CATS
 class CatsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -216,6 +223,7 @@ class PhotoSerializer1(serializers.ModelSerializer):
         model = Photos
         fields = ['id', 'title', 'photo', 'timestamp', 'uploaded_at', 'owner', 'likes', 'is_published']
         read_only_fields = ['id', 'timestamp', 'uploaded_at', 'owner']
+
 
 
 

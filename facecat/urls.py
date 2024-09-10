@@ -8,7 +8,8 @@ from cat.views import (RegisterView, LoginView,MessagesView,MessagesListView,
                        UserrequestAll,GetCsrfToken,FriendsListView,LogoutView,profilebisview,PhotoUploadView, 
                        photobisview,PhotosByUsernameView, LikePhotosAPIView,PhotosAll, VideoLikesCountAPIView, LikeVideosAPIView, 
                        VideoUploadView, videobisview, VideosByUsernameView, CommentsByPhoto, PhotoUploadfilView,PhotosLikesCountAPIView, CommentsViewidphoto, PhotoLikesCountTestAPIView,FriendrequestAll, VideoUploadfilView,VideoLikesCountTestAPIView, CommentsByVideo, CommentsViewidvideo, 
-                       FriendsMessagesView, FriendsPhotosView, FriendsVideosView, ProfilePictureAllView,LikesProfileAPIView, LikeProfileViewtest,MessagesChatCreateView, MessagesChatListView)
+                       FriendsMessagesView, FriendsPhotosView, FriendsVideosView, ProfilePictureAllView,LikesProfileAPIView, LikeProfileViewtest,
+                       MessagesChatCreateView, MessagesChatListView,TopProfilesView, TopPhotosView,TopVideosView)
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.contrib import admin
 from django.urls import path, include
@@ -59,7 +60,9 @@ urlpatterns = [
     path('comments/commentsbymessage/link/<int:message_id>/', CommentsByMessage.as_view(), name='comments-by-message'),
     path('comments/commentsbyphoto/link/<int:photo_id>/', CommentsByPhoto.as_view(), name='comments-by-photo'),
     path('comments/commentsbyvideo/link/<int:video_id>/', CommentsByVideo.as_view(), name='comments-by-video'),
-
+     path('top-profiles/', TopProfilesView.as_view(), name='top-profiles'),
+    path('top-videos/', TopVideosView.as_view(), name='top-videos'),
+    path('top-photos/', TopPhotosView.as_view(), name='top-photos'),
     path('search/friends/', searchUserFriend.as_view(), name='search-user'),
     path('getfriends/', UserFriendsView.as_view(), name='get-friends'),
     path('addfriends/', AddFriendsView.as_view(), name='add-friends'),

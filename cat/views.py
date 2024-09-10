@@ -11,7 +11,7 @@ from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import CustomUser,Messages,Comments,FriendRequest, Profile,Photos, Videos, MessagesChat
-from .serializers import FriendRequestSerializerAll, UserSerializer,MessageSerializer,CommentsSerializer,CommentsAllSerializer, Comments_By_Message_Serializer,PhotoSerializer1, ProfileSerializer, CustomfriendsSerializer,FriendsSerializer, CustomUserMinimalSerializer, ProfileSerializer1, PhotoSerializer, VideosSerializer, VideosSerializer1, CommentsphotosSerializer, Comments_By_Photo_Serializer, Comments_By_Video_Serializer, CommentsvideosSerializer, ProfileSerializer3, ChatSerializer
+from .serializers import FriendRequestSerializerAll, UserSerializer,MessageSerializer,CommentsSerializer,CommentsAllSerializer, Comments_By_Message_Serializer,PhotoSerializer1,ProfileSerializer4, ProfileSerializer, CustomfriendsSerializer,FriendsSerializer, CustomUserMinimalSerializer, ProfileSerializer1, PhotoSerializer, VideosSerializer, VideosSerializer1, CommentsphotosSerializer, Comments_By_Photo_Serializer, Comments_By_Video_Serializer, CommentsvideosSerializer, ProfileSerializer3, ChatSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.contrib.auth import authenticate, login, logout
@@ -23,6 +23,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.views import APIView
+from django.db.models import F, Window
+from django.db.models.functions import Rank
 
 
 
@@ -1122,3 +1124,61 @@ class MessagesChatListView(generics.ListAPIView):
 
         queryset = ChatSerializer.objects.filter(sender_id=sender_id, receiver_id=receiver_id)
         return queryset
+
+class TopProfilesView(APIView):
+    def get(self, request):
+        profiles_with_rank = Profile.objects.annotate(
+            rank=Window(
+                expression=Rank(),
+                order_by=F('likes').desc()
+            )
+        ).filter(rank__lte=3).select_related('user')
+
+        serializer = ProfileSerializer4(profiles_with_rank, many=True)
+        return Response(serializer.data)
+    
+    
+
+class TopVideosView(APIView):
+    def get(self, request):
+        # Classe les vidéos par 'likes' et assigne un rang
+        videos_with_rank = Videos.objects.annotate(
+            rank=Window(
+                expression=Rank(),
+                order_by=F('likes').desc()
+            )
+        ).filter(rank__lte=3)  # Récupère toutes les vidéos dont le rang est dans les 3 premiers
+
+        # Sérialisation des vidéos
+        serializer = VideosSerializer(videos_with_rank, many=True)
+        data = serializer.data
+
+        # Ajouter le nom de l'utilisateur (username) pour chaque vidéo
+        for item in data:
+            video = Videos.objects.get(id=item['id'])  # Récupérer la vidéo par son ID
+            item['username'] = video.owner.username  # Ajouter le nom de l'utilisateur propriétaire
+
+        return Response(data)
+    
+
+class TopPhotosView(APIView):
+    def get(self, request):
+        # Classe les photos par 'likes' et assigne un rang
+        photos_with_rank = Photos.objects.annotate(
+            rank=Window(
+                expression=Rank(),
+                order_by=F('likes').desc()
+            )
+        ).filter(rank__lte=3)  # Récupère toutes les photos dont le rang est dans les 3 premiers
+
+        # Sérialisation des photos
+        serializer = PhotoSerializer(photos_with_rank, many=True)
+        data = serializer.data
+
+        # Ajouter le nom de l'utilisateur (username) pour chaque photo
+        for item in data:
+            photo = Photos.objects.get(id=item['id'])  # Récupérer la photo par son ID
+            item['username'] = photo.owner.username  # Ajouter le nom de l'utilisateur propriétaire
+
+        return Response(data)
+
